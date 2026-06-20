@@ -1,0 +1,545 @@
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
+<style>
+  .sky-bg { background-color: #0a2342 !important; }
+  .sky-hero { background-color: #0d2855; padding: 2rem 0; }
+  .flight-card { border-left: 4px solid #0d6efd; transition: box-shadow .2s; }
+  .flight-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .badge-pending { background-color: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+  .badge-confirmed { background-color: #d1e7dd; color: #0f5132; border: 1px solid #198754; }
+  .badge-cancelled { background-color: #f8d7da; color: #842029; border: 1px solid #dc3545; }
+  .selector-bar { position: sticky; top: 0; z-index: 999; background: #fff; border-bottom: 1px solid #dee2e6; padding: 8px 12px; }
+  .boceto-tag { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: #6c757d; font-weight: 600; }
+  .airline-chip { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 28px; border-radius: 4px; font-size: 11px; font-weight: 700; color: #fff; }
+  .sidebar-nav .list-group-item { font-size: 13px; border-radius: 0; }
+  .sidebar-nav .list-group-item.active { background-color: #0a2342; border-color: #0a2342; }
+</style>
+
+<div class="selector-bar d-flex align-items-center gap-2 flex-wrap">
+  <span class="boceto-tag me-1">Bocetos:</span>
+  <button class="btn btn-sm btn-primary" id="btn-0" onclick="showB(0)"><i class="bi bi-house-fill me-1"></i>1. Home</button>
+  <button class="btn btn-sm btn-outline-secondary" id="btn-1" onclick="showB(1)"><i class="bi bi-search me-1"></i>2. Búsqueda de vuelos</button>
+  <button class="btn btn-sm btn-outline-secondary" id="btn-2" onclick="showB(2)"><i class="bi bi-building me-1"></i>3. Admin — ABMC Aerolíneas</button>
+  <button class="btn btn-sm btn-outline-secondary" id="btn-3" onclick="showB(3)"><i class="bi bi-journal-text me-1"></i>4. Mis Reservas</button>
+</div>
+
+<!--BOCETO 1: HOME-->
+<div id="b0" class="boceto">
+  <nav class="navbar navbar-expand-lg navbar-dark sky-bg px-3">
+    <a class="navbar-brand fw-bold fs-5" href="#"><i class="bi bi-airplane-fill me-2"></i>Check-Line</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#n1"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="n1">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link active" href="#">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Vuelos</a></li>
+        <li class="nav-item"><a class="nav-link" href="#">Novedades</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-light btn-sm">Iniciar sesión</button>
+        <button class="btn btn-warning btn-sm fw-bold">Registrarse</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="sky-hero text-white">
+    <div class="container py-2">
+      <h1 class="fw-bold mb-1" style="font-size:1.8rem;">Encontrá tu vuelo ideal</h1>
+      <p class="mb-3" style="color:rgba(255,255,255,.6);">Buscá entre cientos de destinos con las mejores tarifas</p>
+      <div class="card shadow-sm">
+        <div class="card-body py-3">
+          <div class="row g-2">
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold mb-1"><i class="bi bi-geo-alt me-1 text-danger"></i>Origen</label>
+              <input type="text" class="form-control form-control-sm" placeholder="Ciudad de origen">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold mb-1"><i class="bi bi-geo-alt-fill me-1 text-primary"></i>Destino</label>
+              <input type="text" class="form-control form-control-sm" placeholder="Ciudad de destino">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold mb-1"><i class="bi bi-calendar3 me-1 text-success"></i>Fecha de ida</label>
+              <input type="date" class="form-control form-control-sm">
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small fw-semibold mb-1"><i class="bi bi-people me-1 text-info"></i>Pasajeros</label>
+              <select class="form-select form-select-sm">
+                <option>1 pasajero</option>
+                <option>2 pasajeros</option>
+                <option>3 pasajeros</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-1 d-flex align-items-end">
+              <button class="btn btn-primary btn-sm w-100"><i class="bi bi-search"></i> Buscar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container my-4">
+    <h5 class="fw-semibold mb-3"><i class="bi bi-megaphone me-2 text-primary"></i>Novedades del Sistema</h5>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card h-100" style="border-left: 4px solid #ffc107;">
+          <div class="card-body">
+            <span class="badge bg-warning text-dark mb-2">Aviso operativo</span>
+            <p class="card-text mb-1 small">Mantenimiento programado sábado 15/08. Los vuelos no se verán afectados.</p>
+            <small class="text-muted"><i class="bi bi-clock me-1"></i>Válido hasta: 15/08/2026</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100" style="border-left: 4px solid #0dcaf0;">
+          <div class="card-body">
+            <span class="badge bg-info text-dark mb-2">Nueva ruta</span>
+            <p class="card-text mb-1 small">Nueva ruta disponible: Buenos Aires – Ushuaia desde ARS 45.000.</p>
+            <small class="text-muted"><i class="bi bi-clock me-1"></i>Válido hasta: 30/09/2026</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="sky-bg text-white py-3 mt-3">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <span class="small"><i class="bi bi-airplane-fill me-1"></i>Check-Line © 2026 — Sistema de Reservas de Vuelos</span>
+      <div class="d-flex gap-3">
+        <a href="#" class="text-white-50 text-decoration-none small">Mapa del Sitio</a>
+        <a href="#" class="text-white-50 text-decoration-none small">Política de Privacidad</a>
+        <a href="#" class="text-white-50 text-decoration-none small">Contacto</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- BOCETO 2: BÚSQUEDA -->
+<div id="b1" class="boceto d-none">
+  <nav class="navbar navbar-dark sky-bg px-3 py-2">
+    <a class="navbar-brand fw-bold" href="#"><i class="bi bi-airplane-fill me-2"></i>Check-Line</a>
+    <div class="d-flex gap-3 align-items-center">
+      <a href="#" class="nav-link text-white-50 small">Mis Reservas</a>
+      <a href="#" class="nav-link text-white-50 small">Mi Perfil</a>
+      <button class="btn btn-outline-light btn-sm">Salir</button>
+    </div>
+  </nav>
+
+  <div class="container mt-3">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-1">
+      <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+      <li class="breadcrumb-item active">Resultados de búsqueda</li>
+    </ol></nav>
+    <h6 class="fw-semibold mb-3">Vuelos disponibles — <span class="text-muted fw-normal">Buenos Aires → Mendoza · 15/08/2026 · 1 pasajero</span></h6>
+
+    <div class="row g-3">
+      <div class="col-md-3">
+        <div class="card">
+          <div class="card-header fw-semibold small py-2"><i class="bi bi-sliders me-1"></i>Filtros</div>
+          <div class="card-body py-2">
+            <p class="small fw-semibold mb-1">Aerolínea</p>
+            <div class="form-check mb-1"><input class="form-check-input" type="checkbox" checked><label class="form-check-label small"> Todas</label></div>
+            <div class="form-check mb-1"><input class="form-check-input" type="checkbox"><label class="form-check-label small"> AirTest</label></div>
+            <div class="form-check mb-2"><input class="form-check-input" type="checkbox"><label class="form-check-label small"> FlyNow</label></div>
+            <hr class="my-2">
+            <p class="small fw-semibold mb-1">Precio máximo</p>
+            <input type="range" class="form-range" min="0" max="200000">
+            <small class="text-muted">Hasta ARS 200.000</small>
+            <hr class="my-2">
+            <p class="small fw-semibold mb-1">Horario salida</p>
+            <div class="form-check mb-1"><input class="form-check-input" type="checkbox"><label class="form-check-label small"> Mañana (6–12hs)</label></div>
+            <div class="form-check mb-1"><input class="form-check-input" type="checkbox"><label class="form-check-label small"> Tarde (12–18hs)</label></div>
+            <div class="form-check mb-2"><input class="form-check-input" type="checkbox"><label class="form-check-label small"> Noche (18–24hs)</label></div>
+            <button class="btn btn-primary btn-sm w-100 mt-1">Aplicar filtros</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-9">
+        <p class="text-muted small mb-2">Se encontraron <strong>2 vuelos</strong> disponibles.</p>
+
+        <div class="card flight-card mb-3">
+          <div class="card-body py-3">
+            <div class="row align-items-center g-2">
+              <div class="col-md-2 text-center">
+                <div class="airline-chip mx-auto mb-1" style="background:#0a2342;">AT</div>
+                <small class="text-muted d-block" style="font-size:11px;">AirTest</small>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="text-center"><div class="fw-bold fs-6">09:00</div><small class="text-muted" style="font-size:11px;">EZE</small></div>
+                  <div class="flex-grow-1 text-center">
+                    <div class="text-muted" style="font-size:11px;">2h 15m</div>
+                    <div class="border-top border-primary mx-1" style="border-width:2px!important;"></div>
+                    <div class="text-muted" style="font-size:10px;">Directo</div>
+                  </div>
+                  <div class="text-center"><div class="fw-bold fs-6">11:15</div><small class="text-muted" style="font-size:11px;">MDZ</small></div>
+                </div>
+              </div>
+              <div class="col-md-2 text-center">
+                <span class="badge bg-success-subtle text-success border border-success-subtle small">
+                  <i class="bi bi-person-check me-1"></i>45 asientos
+                </span>
+              </div>
+              <div class="col-md-2 text-center">
+                <div class="text-muted small text-decoration-line-through">ARS 100.000</div>
+                <div class="fw-bold text-primary">ARS 85.000</div>
+                <span class="badge bg-danger" style="font-size:10px;">-15% PROMO</span>
+              </div>
+              <div class="col-md-2 text-center">
+                <button class="btn btn-primary btn-sm w-100">Reservar <i class="bi bi-arrow-right ms-1"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-3" style="border-left: 4px solid #198754;">
+          <div class="card-body py-3">
+            <div class="row align-items-center g-2">
+              <div class="col-md-2 text-center">
+                <div class="airline-chip mx-auto mb-1" style="background:#198754;">FN</div>
+                <small class="text-muted d-block" style="font-size:11px;">FlyNow</small>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="text-center"><div class="fw-bold fs-6">14:30</div><small class="text-muted" style="font-size:11px;">EZE</small></div>
+                  <div class="flex-grow-1 text-center">
+                    <div class="text-muted" style="font-size:11px;">2h 00m</div>
+                    <div class="border-top border-success mx-1" style="border-width:2px!important;"></div>
+                    <div class="text-muted" style="font-size:10px;">Directo</div>
+                  </div>
+                  <div class="text-center"><div class="fw-bold fs-6">16:30</div><small class="text-muted" style="font-size:11px;">MDZ</small></div>
+                </div>
+              </div>
+              <div class="col-md-2 text-center">
+                <span class="badge bg-warning-subtle text-warning border border-warning-subtle small">
+                  <i class="bi bi-person-check me-1"></i>12 asientos
+                </span>
+              </div>
+              <div class="col-md-2 text-center">
+                <div class="fw-bold text-success">ARS 72.000</div>
+                <small class="text-muted" style="font-size:10px;">Precio final</small>
+              </div>
+              <div class="col-md-2 text-center">
+                <button class="btn btn-success btn-sm w-100">Reservar <i class="bi bi-arrow-right ms-1"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <nav><ul class="pagination pagination-sm">
+          <li class="page-item disabled"><a class="page-link" href="#">‹</a></li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">›</a></li>
+        </ul></nav>
+      </div>
+    </div>
+  </div>
+
+  <footer class="sky-bg text-white py-3 mt-3">
+    <div class="container d-flex justify-content-between align-items-center">
+      <span class="small"><i class="bi bi-airplane-fill me-1"></i>Check-Line © 2026</span>
+      <div class="d-flex gap-3">
+        <a href="#" class="text-white-50 text-decoration-none small">Mapa del Sitio</a>
+        <a href="#" class="text-white-50 text-decoration-none small">Privacidad</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- BOCETO 3: ADMIN ABMC -->
+<div id="b2" class="boceto d-none">
+  <nav class="navbar navbar-dark sky-bg px-3 py-2">
+    <a class="navbar-brand fw-bold" href="#"><i class="bi bi-airplane-fill me-2"></i>Check-Line <span class="badge bg-warning text-dark ms-1" style="font-size:10px;">Admin</span></a>
+    <div class="d-flex gap-2 align-items-center">
+      <span class="text-white-50 small d-none d-md-block"><i class="bi bi-person-circle me-1"></i>admin@check-line.com</span>
+      <button class="btn btn-outline-light btn-sm">Salir</button>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-3">
+    <div class="row">
+      <div class="col-md-2 sidebar-nav">
+        <div class="list-group list-group-flush">
+          <a href="#" class="list-group-item list-group-item-action active"><i class="bi bi-building me-2"></i>Aerolíneas</a>
+          <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-check2-circle me-2"></i>Aprobaciones</a>
+          <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-megaphone me-2"></i>Novedades</a>
+          <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-bar-chart-line me-2"></i>Reportes</a>
+          <a href="#" class="list-group-item list-group-item-action"><i class="bi bi-person-circle me-2"></i>Mi Perfil</a>
+        </div>
+      </div>
+
+      <div class="col-md-10">
+        <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-2">
+          <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+          <li class="breadcrumb-item active">Gestión de Aerolíneas</li>
+        </ol></nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-semibold mb-0"><i class="bi bi-building me-2 text-primary"></i>Gestión de Aerolíneas</h6>
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('modalA').classList.remove('d-none')">
+            <i class="bi bi-plus-circle me-1"></i>Nueva Aerolínea
+          </button>
+        </div>
+
+        <div class="row mb-3 g-2">
+          <div class="col-md-5">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input type="text" class="form-control" placeholder="Buscar por nombre o código...">
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-striped table-hover table-bordered align-middle" style="font-size:13px;">
+            <thead class="table-dark">
+              <tr>
+                <th style="width:50px;">#</th>
+                <th>Nombre <i class="bi bi-arrow-down-up text-secondary ms-1" style="font-size:10px;"></i></th>
+                <th>Código</th>
+                <th>País</th>
+                <th>Vuelos activos</th>
+                <th>CEO asignado</th>
+                <th style="width:100px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-muted">1</td>
+                <td><strong>AirTest</strong></td>
+                <td><span class="badge bg-secondary">AT</span></td>
+                <td><i class="bi bi-flag me-1"></i>Argentina</td>
+                <td><span class="badge bg-primary rounded-pill">8</span></td>
+                <td class="text-muted">ceo.airtest@check-line.com</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary py-0 me-1" title="Editar"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger py-0" title="Eliminar"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted">2</td>
+                <td><strong>FlyNow</strong></td>
+                <td><span class="badge bg-secondary">FN</span></td>
+                <td><i class="bi bi-flag me-1"></i>Argentina</td>
+                <td><span class="badge bg-primary rounded-pill">5</span></td>
+                <td class="text-muted">ceo.flynow@check-line.com</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary py-0 me-1"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger py-0"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-muted">3</td>
+                <td><strong>SurAir</strong></td>
+                <td><span class="badge bg-secondary">SA</span></td>
+                <td><i class="bi bi-flag me-1"></i>Chile</td>
+                <td><span class="badge bg-primary rounded-pill">3</span></td>
+                <td class="text-muted">ceo.surair@check-line.com</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary py-0 me-1"><i class="bi bi-pencil"></i></button>
+                  <button class="btn btn-sm btn-outline-danger py-0"><i class="bi bi-trash"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <nav><ul class="pagination pagination-sm">
+          <li class="page-item disabled"><a class="page-link" href="#">‹ Anterior</a></li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">Siguiente ›</a></li>
+        </ul></nav>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalA" class="d-none" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;">
+    <div class="card shadow" style="width:420px;max-width:95vw;">
+      <div class="card-header sky-bg text-white d-flex justify-content-between align-items-center">
+        <strong><i class="bi bi-building-add me-2"></i>Nueva Aerolínea</strong>
+        <button class="btn-close btn-close-white btn-sm" onclick="document.getElementById('modalA').classList.add('d-none')"></button>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Nombre <span class="text-danger">*</span></label>
+          <input type="text" class="form-control form-control-sm" placeholder="Nombre de la aerolínea">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Código <span class="text-danger">*</span></label>
+          <input type="text" class="form-control form-control-sm" placeholder="Ej: AT" maxlength="3">
+          <div class="form-text">Máximo 3 caracteres, único en el sistema.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">País de origen</label>
+          <select class="form-select form-select-sm"><option>Argentina</option><option>Chile</option><option>Brasil</option></select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Correo del CEO asignado</label>
+          <input type="email" class="form-control form-control-sm" placeholder="ceo@check-line.com">
+        </div>
+        <div class="alert alert-info py-2 small"><i class="bi bi-info-circle me-1"></i>El código es autogenerado de forma numérica y secuencial internamente.</div>
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('modalA').classList.add('d-none')">Cancelar</button>
+        <button class="btn btn-primary btn-sm"><i class="bi bi-floppy me-1"></i>Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="sky-bg text-white py-3 mt-3">
+    <div class="container d-flex justify-content-between align-items-center">
+      <span class="small"><i class="bi bi-airplane-fill me-1"></i>Check-Line © 2026</span>
+      <a href="#" class="text-white-50 text-decoration-none small">Mapa del Sitio</a>
+    </div>
+  </footer>
+</div>
+
+<!-- BOCETO 4: MIS RESERVAS -->
+<div id="b3" class="boceto d-none">
+  <nav class="navbar navbar-dark sky-bg px-3 py-2">
+    <a class="navbar-brand fw-bold" href="#"><i class="bi bi-airplane-fill me-2"></i>Check-Line</a>
+    <div class="d-flex gap-3 align-items-center">
+      <a href="#" class="nav-link text-white-50 small">Buscar vuelos</a>
+      <a href="#" class="nav-link text-warning small fw-semibold">Mis Reservas</a>
+      <a href="#" class="nav-link text-white-50 small">Mi Perfil</a>
+      <button class="btn btn-outline-light btn-sm">Salir</button>
+    </div>
+  </nav>
+
+  <div class="container mt-3">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-1">
+      <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+      <li class="breadcrumb-item active">Mis Reservas</li>
+    </ol></nav>
+    <h6 class="fw-semibold mb-3"><i class="bi bi-journal-text me-2 text-primary"></i>Mis Reservas</h6>
+
+    <div class="row g-2 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card text-center py-2">
+          <div class="text-muted" style="font-size:11px;">Total reservas</div>
+          <div class="fs-4 fw-bold">5</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center py-2" style="border-color:#ffc107;">
+          <div class="text-muted" style="font-size:11px;">Pendientes de pago</div>
+          <div class="fs-4 fw-bold text-warning">2</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center py-2" style="border-color:#198754;">
+          <div class="text-muted" style="font-size:11px;">Confirmadas</div>
+          <div class="fs-4 fw-bold text-success">2</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card text-center py-2" style="border-color:#dc3545;">
+          <div class="text-muted" style="font-size:11px;">Canceladas</div>
+          <div class="fs-4 fw-bold text-danger">1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+      <button class="btn btn-sm btn-primary">Todas</button>
+      <button class="btn btn-sm btn-outline-warning">Pendientes</button>
+      <button class="btn btn-sm btn-outline-success">Confirmadas</button>
+      <button class="btn btn-sm btn-outline-danger">Canceladas</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle" style="font-size:13px;">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Vuelo</th>
+            <th>Ruta</th>
+            <th>Fecha vuelo</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>#R010</strong></td>
+            <td><span class="badge bg-secondary">AT-0023</span></td>
+            <td><i class="bi bi-geo-alt text-danger me-1"></i>BUE → MDZ</td>
+            <td><small>15/08/2026 09:00hs</small></td>
+            <td class="fw-semibold">ARS 85.000</td>
+            <td><span class="badge badge-pending rounded-pill px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pendiente de pago</span></td>
+            <td>
+              <button class="btn btn-sm btn-success py-0 me-1"><i class="bi bi-credit-card me-1"></i>Pagar</button>
+              <button class="btn btn-sm btn-outline-danger py-0" title="Cancelar"><i class="bi bi-x-circle"></i></button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>#R007</strong></td>
+            <td><span class="badge bg-secondary">FN-0015</span></td>
+            <td><i class="bi bi-geo-alt text-danger me-1"></i>BUE → COR</td>
+            <td><small>10/07/2026 14:30hs</small></td>
+            <td class="fw-semibold">ARS 58.000</td>
+            <td><span class="badge badge-confirmed rounded-pill px-2 py-1"><i class="bi bi-check-circle me-1"></i>Confirmada</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-secondary py-0"><i class="bi bi-eye me-1"></i>Ver detalle</button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>#R005</strong></td>
+            <td><span class="badge bg-secondary">AT-0018</span></td>
+            <td><i class="bi bi-geo-alt text-danger me-1"></i>MDZ → BUE</td>
+            <td><small>20/06/2026 08:00hs</small></td>
+            <td class="fw-semibold">ARS 76.000</td>
+            <td><span class="badge badge-pending rounded-pill px-2 py-1"><i class="bi bi-hourglass-split me-1"></i>Pendiente de pago</span></td>
+            <td>
+              <button class="btn btn-sm btn-success py-0 me-1"><i class="bi bi-credit-card me-1"></i>Pagar</button>
+              <button class="btn btn-sm btn-outline-danger py-0" title="Cancelar"><i class="bi bi-x-circle"></i></button>
+            </td>
+          </tr>
+          <tr class="text-muted">
+            <td><strong>#R003</strong></td>
+            <td><span class="badge bg-secondary">SA-0008</span></td>
+            <td><i class="bi bi-geo-alt me-1"></i>BUE → GRU</td>
+            <td><small>01/06/2026 16:00hs</small></td>
+            <td class="fw-semibold">ARS 142.000</td>
+            <td><span class="badge badge-cancelled rounded-pill px-2 py-1"><i class="bi bi-x-circle me-1"></i>Cancelada</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-secondary py-0"><i class="bi bi-eye me-1"></i>Ver detalle</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <nav><ul class="pagination pagination-sm">
+      <li class="page-item disabled"><a class="page-link" href="#">‹</a></li>
+      <li class="page-item active"><a class="page-link" href="#">1</a></li>
+      <li class="page-item"><a class="page-link" href="#">2</a></li>
+      <li class="page-item"><a class="page-link" href="#">›</a></li>
+    </ul></nav>
+  </div>
+
+  <footer class="sky-bg text-white py-3 mt-3">
+    <div class="container d-flex justify-content-between align-items-center">
+      <span class="small"><i class="bi bi-airplane-fill me-1"></i>Check-Line © 2026</span>
+      <a href="#" class="text-white-50 text-decoration-none small">Mapa del Sitio</a>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+  function showB(n) {
+    document.querySelectorAll('.boceto').forEach((el, i) => {
+      el.classList.toggle('d-none', i !== n);
+    });
+    document.querySelectorAll('[id^="btn-"]').forEach((btn, i) => {
+      btn.classList.toggle('btn-primary', i === n);
+      btn.classList.toggle('btn-outline-secondary', i !== n);
+    });
+  }
+  document.querySelectorAll('.boceto').forEach((el, i) => {
+    if (i !== 0) el.classList.add('d-none');
+  });
+</script>
