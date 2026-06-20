@@ -6,10 +6,10 @@
 
 // --- Datos de conexión ---
 // En producción, mover estos valores a variables de entorno (.env) fuera del raíz público.
-define('DB_HOST', 'localhost');
+define('DB_HOST', 'localhost:3306'); 
 define('DB_NAME', 'checkline');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', '1768');
 define('DB_CHARSET', 'utf8mb4');
 
 function getConexion(): PDO
@@ -26,10 +26,8 @@ function getConexion(): PDO
 
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $opciones);
-        } catch (PDOException $e) {
-            // No exponer detalles de la BD al usuario final (buena práctica de seguridad)
-            error_log('Error de conexión a BD: ' . $e->getMessage());
-            die('No se pudo establecer conexión con el sistema. Intente más tarde.');
+        }         catch (PDOException $e) {
+            die('ERROR REAL: ' . $e->getMessage());
         }
     }
 

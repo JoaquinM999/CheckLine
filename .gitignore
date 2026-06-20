@@ -1,0 +1,14 @@
+# ============================================================================
+# CHECK-LINE - REGLAS DE EXCLUSIÓN DE GIT
+# ============================================================================
+
+# Ignorar archivos de configuración con credenciales sensibles
+config/db.php
+.env
+
+# Ignorar archivos temporales del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Ignorar logs de errores locales
+*.log

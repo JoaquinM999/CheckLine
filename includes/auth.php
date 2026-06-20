@@ -50,10 +50,10 @@ function requerirRol(string $rolRequerido): void
 function urlSegunRol(string $rol): string
 {
     return match ($rol) {
-        'admin'    => '/admin/aerolineas.php',
-        'ceo'      => '/ceo/index.php',
-        'pasajero' => '/index.php',
-        default    => '/login.php',
+        'admin'    => 'admin/aerolineas.php',
+        'ceo'      => 'ceo/index.php',
+        'pasajero' => 'index.php',
+        default    => 'login.php',
     };
 }
 
