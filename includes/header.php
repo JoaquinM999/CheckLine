@@ -35,14 +35,14 @@ $tituloPagina = $tituloPagina ?? 'Check-Line — Admin';
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="../style.css">
 </head>
 <body class="bg-light" data-bs-theme="light">
 
 <header role="banner">
   <nav class="navbar navbar-dark px-3 py-2" style="background-color:#0A2342;" aria-label="Navegación principal del administrador">
     
-    <a class="navbar-brand fw-bold" href="/admin/index.php" aria-label="Volver al inicio del panel de administración Check-Line">
+    <a class="navbar-brand fw-bold" href="aerolineas.php" aria-label="Volver al inicio del panel de administración Check-Line">
       <i class="bi bi-airplane-fill me-2" aria-hidden="true"></i>Check-Line
       <span class="badge bg-warning text-dark ms-1" style="font-size:10px;" aria-label="Nivel de acceso actual: Administrador">Admin</span>
     </a>
@@ -53,7 +53,7 @@ $tituloPagina = $tituloPagina ?? 'Check-Line — Admin';
         <span class="visually-hidden">Usuario conectado: </span>
         <?= htmlspecialchars(nombreUsuarioActual()) ?>
       </span>
-      <a href="/logout.php" class="btn btn-outline-light btn-sm" aria-label="Cerrar sesión de forma segura del sistema" role="button">Salir</a>
+      <a href="../logout.php" class="btn btn-outline-light btn-sm" aria-label="Cerrar sesión de forma segura del sistema" role="button">Salir</a>
     </div>
 
   </nav>
@@ -65,7 +65,7 @@ $tituloPagina = $tituloPagina ?? 'Check-Line — Admin';
     <nav class="col-md-2 sidebar-nav" aria-label="Menú de navegación lateral de administración">
       <div class="list-group list-group-flush" role="menu">
         
-        <a href="/admin/aerolineas.php"
+        <a href="aerolineas.php"
            role="menuitem"
            aria-label="Gestionar base de datos de Aerolíneas"
            <?= ($seccionActiva ?? '') === 'aerolineas' ? 'aria-current="page"' : '' ?>
@@ -73,7 +73,7 @@ $tituloPagina = $tituloPagina ?? 'Check-Line — Admin';
           <i class="bi bi-building me-2" aria-hidden="true"></i>Aerolíneas
         </a>
         
-        <a href="/admin/promociones.php"
+        <a href="promociones.php"
            role="menuitem"
            aria-label="Revisar y gestionar Aprobaciones de Promociones"
            <?= ($seccionActiva ?? '') === 'promociones' ? 'aria-current="page"' : '' ?>
@@ -81,7 +81,7 @@ $tituloPagina = $tituloPagina ?? 'Check-Line — Admin';
           <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>Aprobaciones
         </a>
         
-        <a href="/admin/novedades.php"
+        <a href="novedades.php"
            role="menuitem"
            aria-label="Administrar las Novedades y Avisos del sistema"
            <?= ($seccionActiva ?? '') === 'novedades' ? 'aria-current="page"' : '' ?>
@@ -89,7 +89,7 @@ $tituloPagina = $tituloPagina ?? 'Check-Line — Admin';
           <i class="bi bi-megaphone me-2" aria-hidden="true"></i>Novedades
         </a>
         
-        <a href="/admin/reportes.php"
+        <a href="reportes.php"
            role="menuitem"
            aria-label="Generar y visualizar Reportes del sistema"
            <?= ($seccionActiva ?? '') === 'reportes' ? 'aria-current="page"' : '' ?>

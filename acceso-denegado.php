@@ -8,7 +8,7 @@ iniciarSesionSiNoExiste();
 
 // Si por algún motivo llega acá sin sesión, lo mandamos a loguearse en vez de mostrar esta página
 if (!usuarioLogueado()) {
-    header('Location: /login.php?error=sesion');
+    header('Location: ' . urlBase() . 'login.php?error=sesion');
     exit;
 }
 

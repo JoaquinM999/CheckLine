@@ -66,7 +66,7 @@ require __DIR__ . '/../includes/header.php';
 ?>
 
 <nav aria-label="breadcrumb"><ol class="breadcrumb small mb-2">
-  <li class="breadcrumb-item"><a href="/admin/index.php">Inicio</a></li>
+  <li class="breadcrumb-item"><a href="aerolineas.php">Inicio</a></li>
   <li class="breadcrumb-item active">Gestión de Aerolíneas</li>
 </ol></nav>
 
@@ -85,7 +85,7 @@ require __DIR__ . '/../includes/header.php';
              value="<?= htmlspecialchars($busqueda) ?>">
       <button class="btn btn-outline-secondary" type="submit">Buscar</button>
       <?php if ($busqueda !== ''): ?>
-        <a href="/admin/aerolineas.php" class="btn btn-outline-danger">Limpiar</a>
+        <a href="aerolineas.php" class="btn btn-outline-danger">Limpiar</a>
       <?php endif; ?>
     </div>
   </div>
@@ -139,7 +139,7 @@ require __DIR__ . '/../includes/header.php';
       <!-- Modal de Edición (prellenado server-side) -->
       <div class="modal fade" id="modalEditar<?= (int) $a['id_aerolinea'] ?>" tabindex="-1">
         <div class="modal-dialog">
-          <form method="POST" action="/admin/aerolinea_action.php" class="modal-content">
+          <form method="POST" action="aerolinea_action.php" class="modal-content">
             <input type="hidden" name="accion" value="editar">
             <input type="hidden" name="id_aerolinea" value="<?= (int) $a['id_aerolinea'] ?>">
             <div class="modal-header" style="background-color:#0A2342;">
@@ -208,7 +208,7 @@ require __DIR__ . '/../includes/header.php';
 <!-- Modal de Alta -->
 <div class="modal fade" id="modalCrear" tabindex="-1">
   <div class="modal-dialog">
-    <form method="POST" action="/admin/aerolinea_action.php" class="modal-content">
+    <form method="POST" action="aerolinea_action.php" class="modal-content">
       <input type="hidden" name="accion" value="crear">
       <div class="modal-header" style="background-color:#0A2342;">
         <h6 class="modal-title text-white"><i class="bi bi-building-add me-2"></i>Nueva Aerolínea</h6>
@@ -263,7 +263,7 @@ require __DIR__ . '/../includes/header.php';
 <!-- Modal de confirmación de Baja (compartido) -->
 <div class="modal fade" id="modalEliminar" tabindex="-1">
   <div class="modal-dialog">
-    <form method="POST" action="/admin/aerolinea_action.php" class="modal-content">
+    <form method="POST" action="aerolinea_action.php" class="modal-content">
       <input type="hidden" name="accion" value="eliminar">
       <input type="hidden" name="id_aerolinea" id="eliminarId" value="">
       <div class="modal-header bg-danger text-white">

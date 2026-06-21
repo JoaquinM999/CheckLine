@@ -28,10 +28,10 @@
     </span>
     
     <nav class="d-flex gap-3" aria-label="Navegación legal y de soporte del sistema">
-      <a href="/mapa-sitio.php" class="text-white-50 text-decoration-none small" aria-label="Consultar el mapa del sitio web">
+      <a href="../mapa-sitio.php" class="text-white-50 text-decoration-none small" aria-label="Consultar el mapa del sitio web">
         Mapa del Sitio
       </a>
-      <a href="/privacidad.php" class="text-white-50 text-decoration-none small" aria-label="Leer la política de privacidad de la plataforma">
+      <a href="../privacidad.php" class="text-white-50 text-decoration-none small" aria-label="Leer la política de privacidad de la plataforma">
         Política de Privacidad
       </a>
     </nav>

@@ -9,7 +9,7 @@ require_once __DIR__ . '/../includes/auth.php';
 requerirRol('admin');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /admin/aerolineas.php');
+    header('Location: aerolineas.php');
     exit;
 }
 
@@ -162,5 +162,5 @@ else {
     setMensaje('danger', 'Acción no reconocida.');
 }
 
-header('Location: /admin/aerolineas.php');
+header('Location: aerolineas.php');
 exit;
