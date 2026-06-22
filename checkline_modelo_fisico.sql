@@ -4,9 +4,6 @@
 -- Integrantes: Carloni, Nahuel — Mierez, Joaquín
 -- ====================================================================
 
-CREATE DATABASE IF NOT EXISTS checkline
-  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE checkline;
 
 -- ====================================================================
 -- ROLES — Admin / CEO / Pasajero

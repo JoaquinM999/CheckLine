@@ -6,10 +6,10 @@
 
 // --- Datos de conexión ---
 // En producción, mover estos valores a variables de entorno (.env) fuera del raíz público.
-define('DB_HOST', 'localhost:3306');
-define('DB_NAME', 'checkline');
-define('DB_USER', 'root');
-define('DB_PASS', '1768');
+define('DB_HOST', 'sql201.infinityfree.com');
+define('DB_NAME', 'if0_42245011_checkline');
+define('DB_USER', 'if0_42245011');
+define('DB_PASS', '2hJAdxbExiVrD');
 define('DB_CHARSET', 'utf8mb4');
 
 function getConexion(): PDO

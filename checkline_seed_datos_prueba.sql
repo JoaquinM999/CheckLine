@@ -1,4 +1,4 @@
-USE checkline;
+
 
 -- Usuarios de prueba (passwords reales generados con password_hash())
 INSERT INTO usuarios (nombre, apellido, email, password_hash, id_rol, activo) VALUES
