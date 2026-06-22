@@ -73,7 +73,7 @@ $tituloPagina = $tituloPagina ?? 'Check-Line — Admin';
           <i class="bi bi-building me-2" aria-hidden="true"></i>Aerolíneas
         </a>
         
-        <a href="promociones.php"
+        <a href="aprobaciones.php"
            role="menuitem"
            aria-label="Revisar y gestionar Aprobaciones de Promociones"
            <?= ($seccionActiva ?? '') === 'promociones' ? 'aria-current="page"' : '' ?>
