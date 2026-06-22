@@ -1,59 +1,54 @@
 <?php
 /**
  * ============================================================================
- * SISTEMA CHECK-LINE - PORTADA PÚBLICA Y BUSCADOR
- * ============================================================================
- * Archivo: index.php
- * Propósito: Renderizar la página de inicio pública (Home) del sistema.
+ * SISTEMA CHECK-LINE - PORTADA PÚBLICA, BUSCADOR Y EXHIBICIÓN DINÁMICA
  * ============================================================================
  */
-
 require_once __DIR__ . '/config/db.php';
 require_once __DIR__ . '/includes/auth.php';
 
 iniciarSesionSiNoExiste();
 $logueado = usuarioLogueado();
+$rolActual = rolActual();
 
-// --- Obtención de Novedades Activas ---
+$novedad = null;
+$promocion = null;
+
+// Extracción de datos dinámicos vigentes
 try {
     $pdo = getConexion();
     
-    // Filtramos estrictamente por fecha actual y limitamos a 2
-    $stmtNovedades = $pdo->query("
-        SELECT titulo, contenido, fecha_fin 
+    // 1. Traer la última Novedad institucional vigente hoy
+    $stmtN = $pdo->query("
+        SELECT titulo, contenido 
         FROM novedades 
-        WHERE CURDATE() >= fecha_inicio AND CURDATE() <= fecha_fin 
-        ORDER BY fecha_fin ASC 
-        LIMIT 2
+        WHERE CURDATE() BETWEEN fecha_inicio AND fecha_fin 
+        ORDER BY id_novedad DESC LIMIT 1
     ");
-    $novedadesActivas = $stmtNovedades->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $novedadesActivas = []; // Fallback silencioso
-}
-// --- Obtención de Promociones Aprobadas ---
-// --- Obtención de Promociones Aprobadas ---
-try {
-    $stmtPromos = $pdo->query("
-        SELECT id_vuelo, descuento_porcentaje 
-        FROM promociones 
-        WHERE estado = 'Aprobada' 
-        ORDER BY descuento_porcentaje DESC 
-        LIMIT 3
+    $novedad = $stmtN->fetch(PDO::FETCH_ASSOC);
+
+    // 2. Traer la última Promoción con estado 'Aprobada' vigente hoy
+    $stmtP = $pdo->query("
+        SELECT p.descuento_porcentaje, a.nombre_aerolinea, v.origen, v.destino 
+        FROM promociones p
+        INNER JOIN vuelos v ON p.id_vuelo = v.id_vuelo
+        INNER JOIN aerolineas a ON v.id_aerolinea = a.id_aerolinea
+        WHERE p.estado = 'Aprobada' AND CURDATE() BETWEEN p.fecha_inicio AND p.fecha_fin
+        ORDER BY p.id_promocion DESC LIMIT 1
     ");
-    $promocionesAprobadas = $stmtPromos->fetchAll(PDO::FETCH_ASSOC);
+    $promocion = $stmtP->fetch(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
-    error_log('Error cargando promociones: ' . $e->getMessage());
-    $promocionesAprobadas = []; 
+    // Fallo silencioso para no romper la maqueta pública
 }
 ?>
 <!DOCTYPE html>
 <html lang="es" dir="ltr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="widtfh=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
   <meta name="description" content="Buscador principal de vuelos y reservas del sistema Check-Line">
   <title>Check-Line — Sistema de Reservas de Vuelos</title>
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
 </head>
@@ -72,20 +67,36 @@ try {
       </button>
 
       <div class="collapse navbar-collapse" id="navbarPrincipal">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item"><a class="nav-link active" aria-current="page" href="index.php">Inicio</a></li>
-        <li class="nav-item"><a class="nav-link" href="vuelos.php">Vuelos</a></li>
-        <li class="nav-item"><a class="nav-link" href="novedades.php">Novedades</a></li>
-        <li class="nav-item"><a class="nav-link fw-semibold text-warning" href="promociones_publicas.php">Promociones</a></li>
-      </ul>
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="index.php">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="vuelos.php">Vuelos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="novedades.php">Novedades</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-warning fw-semibold" href="promociones_publicas.php">
+              <i class="bi bi-tags-fill me-1"></i>Ofertas
+            </a>
+          </li>
+        </ul>
 
         <div class="d-flex gap-2 align-items-center" role="group" aria-label="Controles de acceso y usuario">
           <?php if ($logueado): ?>
-            <a href="perfil.php" class="btn btn-outline-light btn-sm"
-               aria-label="Ver y editar mi perfil">
+            <span class="text-white-50 small align-self-center me-3" aria-live="polite">
               <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
-              <?= htmlspecialchars($_SESSION['nombre']) ?>
-            </a>
+              <?= htmlspecialchars($_SESSION['nombre'] ?? 'Usuario') ?>
+            </span>
+            
+            <?php if ($rolActual === 'admin' || $rolActual === 'ceo'): ?>
+              <a href="<?= htmlspecialchars(urlSegunRol($rolActual)) ?>" class="btn btn-outline-info btn-sm">Mi Panel</a>
+            <?php else: ?>
+              <a href="mis_reservas.php" class="btn btn-outline-info btn-sm">Mis Reservas</a>
+            <?php endif; ?>
+
             <a href="logout.php" class="btn btn-outline-light btn-sm" aria-label="Cerrar sesión actual">Salir</a>
           <?php else: ?>
             <a href="login.php" class="btn btn-outline-light btn-sm" aria-label="Ingresar al sistema">Iniciar sesión</a>
@@ -103,7 +114,7 @@ try {
   <section aria-labelledby="titulo-buscador" class="card shadow-sm mb-5 border-0 rounded-3">
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
       <h1 id="titulo-buscador" class="h4 text-center fw-bold" style="color: #0A2342;">
-        Formulario de Búsqueda de Vuelos
+        Búsqueda de Vuelos Disponibles
       </h1>
     </div>
     <div class="card-body p-4">
@@ -114,7 +125,7 @@ try {
             <label for="inputOrigen" class="form-label fw-semibold small text-muted">Origen</label>
             <div class="input-group">
               <span class="input-group-text bg-white"><i class="bi bi-geo-alt"></i></span>
-              <input type="text" class="form-control" id="inputOrigen" name="origen" placeholder="Ciudad o Aeropuerto" aria-required="true">
+              <input type="text" class="form-control" id="inputOrigen" name="origen" placeholder="Ciudad o IATA">
             </div>
           </div>
           
@@ -122,20 +133,20 @@ try {
             <label for="inputDestino" class="form-label fw-semibold small text-muted">Destino</label>
             <div class="input-group">
               <span class="input-group-text bg-white"><i class="bi bi-pin-map"></i></span>
-              <input type="text" class="form-control" id="inputDestino" name="destino" placeholder="Ciudad o Aeropuerto" aria-required="true">
+              <input type="text" class="form-control" id="inputDestino" name="destino" placeholder="Ciudad o IATA">
             </div>
           </div>
           
           <div class="col-md-4">
-            <label for="inputFechas" class="form-label fw-semibold small text-muted">Fecha de Viaje</label>
+            <label for="inputFechas" class="form-label fw-semibold small text-muted">Fecha de Salida</label>
             <div class="input-group">
               <span class="input-group-text bg-white"><i class="bi bi-calendar3"></i></span>
-              <input type="date" class="form-control" id="inputFechas" name="fecha" aria-required="true">
+              <input type="date" class="form-control" id="inputFechas" name="fecha">
             </div>
           </div>
           
           <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-primary fw-bold" style="background-color: #0A2342; border-color: #0A2342;">
+            <button type="submit" class="btn btn-primary fw-bold shadow-sm" style="background-color: #0A2342; border-color: #0A2342;">
               <i class="bi bi-search me-1" aria-hidden="true"></i>Buscar
             </button>
           </div>
@@ -146,68 +157,36 @@ try {
   </section>
 
   <section aria-label="Novedades y avisos destacados" class="row g-4 mb-5">
-  <?php if (empty($novedadesActivas)): ?>
-    <div class="col-12 text-center p-5 bg-white shadow-sm rounded-3">
-      <i class="bi bi-info-circle display-4 text-muted mb-3 d-block"></i>
-      <p class="text-muted small mb-0">No hay avisos institucionales vigentes en este momento.</p>
-    </div>
-  <?php else: ?>
-    <?php foreach ($novedadesActivas as $novedad): ?>
-      <article class="col-md-6">
-        <div class="card h-100 shadow-sm border-0 bg-white p-4 text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 200px;">
-          <i class="bi bi-info-square display-4 text-primary mb-3" style="opacity: 0.8;" aria-hidden="true"></i>
-          <h2 class="h5 text-dark fw-bold"><?= htmlspecialchars($novedad['titulo']) ?></h2>
-          <p class="text-muted small mb-4 px-3"><?= htmlspecialchars($novedad['contenido']) ?></p>
-          <span class="badge bg-light text-dark border mt-auto shadow-sm">
-            <i class="bi bi-clock-history me-1"></i>Vigente hasta: <?= date('d/m/Y', strtotime($novedad['fecha_fin'])) ?>
-          </span>
-        </div>
-      </article>
-    <?php endforeach; ?>
-  <?php endif; ?>
-</section>
-<section aria-labelledby="titulo-promociones" class="mb-5">
-  <div class="d-flex align-items-center mb-4">
-    <h2 id="titulo-promociones" class="h4 fw-bold mb-0" style="color: #0A2342;">Beneficios y Oportunidades</h2>
-    <div class="flex-grow-1 border-bottom ms-4"></div>
-  </div>
-
-  <div class="row g-4">
-    <?php if (empty($promocionesAprobadas)): ?>
-      <div class="col-12 text-center p-5 bg-white shadow-sm rounded-3 border-0">
-        <i class="bi bi-tags display-4 text-muted opacity-50 mb-3 d-block"></i>
-        <p class="text-muted small mb-0">No hay beneficios activos publicados en este momento.</p>
+    
+    <article class="col-md-6">
+      <div class="card h-100 shadow-sm border-0 bg-white p-4 text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 200px;">
+        <i class="bi bi-megaphone display-4 text-primary mb-3" aria-hidden="true"></i>
+        <?php if ($novedad): ?>
+          <h2 class="h5 fw-bold text-dark mb-2"><?= htmlspecialchars($novedad['titulo']) ?></h2>
+          <p class="text-muted small mb-0"><?= htmlspecialchars($novedad['contenido']) ?></p>
+        <?php else: ?>
+          <h2 class="h5 text-muted mb-2">Información para Pasajeros</h2>
+          <p class="text-muted small mb-0">Todos nuestros aeropuertos y rutas comerciales operan en horario programado.</p>
+        <?php endif; ?>
       </div>
-    <?php else: ?>
-      <?php foreach ($promocionesAprobadas as $promo): ?>
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm border-0 bg-white text-center">
-            <div class="card-header bg-transparent border-0 pt-4 pb-0">
-              <span class="badge bg-success bg-opacity-10 text-success border border-success fw-bold px-3 py-2">
-                Promoción Autorizada
-              </span>
-            </div>
-            <div class="card-body p-4 d-flex flex-column">
-              <div class="mb-3">
-                <!-- Ajuste estructural: Llamada a la columna real -->
-                <span class="display-3 fw-bold text-dark">-<?= htmlspecialchars($promo['descuento_porcentaje']) ?>%</span>
-              </div>
-              <h3 class="h6 fw-bold mb-2" style="color: #0A2342;">Vuelo #<?= htmlspecialchars($promo['id_vuelo']) ?></h3>
-              
-              <!-- El bloque de descripción inexistente fue erradicado para evitar quiebres -->
-              
-              <a href="vuelos.php?id_vuelo=<?= $promo['id_vuelo'] ?>" 
-                 class="btn btn-outline-primary btn-sm w-100 mt-auto fw-bold" 
-                 style="border-color: #0A2342; color: #0A2342;">
-                Consultar Vuelo
-              </a>
-            </div>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    <?php endif; ?>
-  </div>
-</section>
+    </article>
+    
+    <article class="col-md-6">
+      <div class="card h-100 shadow-sm border-0 bg-white p-4 text-center d-flex flex-column justify-content-center align-items-center" style="min-height: 200px;">
+        <i class="bi bi-tags display-4 text-warning mb-3" aria-hidden="true"></i>
+        <?php if ($promocion): ?>
+          <span class="badge bg-warning text-dark fw-bold mb-2">¡OFERTA VERIFICADA!</span>
+          <h2 class="h5 fw-bold text-dark mb-1"><?= htmlspecialchars($promocion['nombre_aerolinea']) ?>: <?= htmlspecialchars($promocion['descuento_porcentaje']) ?>% OFF</h2>
+          <p class="text-muted small mb-0">Ruta en promoción: <?= htmlspecialchars($promocion['origen']) ?> <i class="bi bi-arrow-right"></i> <?= htmlspecialchars($promocion['destino']) ?></p>
+        <?php else: ?>
+          <h2 class="h5 text-muted mb-2">Oportunidades Check-Line</h2>
+          <p class="text-muted small mb-0">Consulta nuestra sección de Ofertas para conocer las próximas tarifas reducidas.</p>
+        <?php endif; ?>
+      </div>
+    </article>
+    
+  </section>
+
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script>
