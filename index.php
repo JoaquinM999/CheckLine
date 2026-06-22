@@ -52,7 +52,7 @@ try {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
 </head>
-<body class="bg-light" data-bs-theme="light">
+<body class="bg-light d-flex flex-column min-vh-100" data-bs-theme="light">
 
 <header role="banner">
   <nav class="navbar navbar-expand-lg navbar-dark px-3 py-2" style="background-color:#0A2342;" aria-label="Navegación principal del sitio">
@@ -109,7 +109,7 @@ try {
   </nav>
 </header>
 
-<main class="container mt-5" role="main">
+<main class="container mt-5 flex-grow-1" role="main">
   
   <section aria-labelledby="titulo-buscador" class="card shadow-sm mb-5 border-0 rounded-3">
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
@@ -188,6 +188,21 @@ try {
   </section>
 
 </main>
+
+<footer role="contentinfo" class="bg-white border-top py-4 mt-auto">
+  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center small text-muted">
+    <div class="mb-2 mb-md-0">
+      <span class="fw-bold" style="color: #0A2342;"><i class="bi bi-airplane-fill me-1"></i>Check-Line</span> &copy; <?= date('Y') ?> — Todos los derechos reservados.
+    </div>
+    <div class="d-flex gap-3 align-items-center">
+      <span><i class="bi bi-geo-alt-fill me-1"></i>Zeballos 1341, Rosario</span>
+      <span><i class="bi bi-telephone-fill me-1"></i>0800-555-CHECK (24hs)</span>
+      <a href="mapa_sitio.php" class="text-decoration-none fw-bold text-primary" aria-label="Acceder al mapa del sitio web">
+        <i class="bi bi-sitemap me-1"></i>Mapa del Sitio
+      </a>
+    </div>
+  </div>
+</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script>
 </body>
