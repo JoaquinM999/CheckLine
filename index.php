@@ -31,19 +31,19 @@ try {
     $novedadesActivas = []; // Fallback silencioso
 }
 // --- Obtención de Promociones Aprobadas ---
+// --- Obtención de Promociones Aprobadas ---
 try {
-    // Reutilizamos la conexión $pdo ya abierta
     $stmtPromos = $pdo->query("
-        SELECT id_vuelo, porcentaje_descuento, descripcion 
+        SELECT id_vuelo, descuento_porcentaje 
         FROM promociones 
         WHERE estado = 'Aprobada' 
-        ORDER BY porcentaje_descuento DESC 
+        ORDER BY descuento_porcentaje DESC 
         LIMIT 3
     ");
     $promocionesAprobadas = $stmtPromos->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log('Error cargando promociones: ' . $e->getMessage());
-    $promocionesAprobadas = []; // Fallback de seguridad
+    $promocionesAprobadas = []; 
 }
 ?>
 <!DOCTYPE html>
@@ -106,7 +106,7 @@ try {
       </h1>
     </div>
     <div class="card-body p-4">
-      <form action="#" method="GET" role="search" aria-label="Buscar vuelos disponibles">
+      <form action="vuelos.php" method="GET" role="search" aria-label="Buscar vuelos disponibles">
         <div class="row g-3 align-items-end">
           
           <div class="col-md-3">
@@ -188,12 +188,14 @@ try {
             </div>
             <div class="card-body p-4 d-flex flex-column">
               <div class="mb-3">
-                <span class="display-3 fw-bold text-dark">-<?= htmlspecialchars($promo['porcentaje_descuento']) ?>%</span>
+                <!-- Ajuste estructural: Llamada a la columna real -->
+                <span class="display-3 fw-bold text-dark">-<?= htmlspecialchars($promo['descuento_porcentaje']) ?>%</span>
               </div>
               <h3 class="h6 fw-bold mb-2" style="color: #0A2342;">Vuelo #<?= htmlspecialchars($promo['id_vuelo']) ?></h3>
-              <p class="text-muted small mb-4 px-2"><?= htmlspecialchars($promo['descripcion']) ?></p>
               
-              <a href="index.php?origen=&destino=&fecha=&id_vuelo=<?= $promo['id_vuelo'] ?>" 
+              <!-- El bloque de descripción inexistente fue erradicado para evitar quiebres -->
+              
+              <a href="vuelos.php?id_vuelo=<?= $promo['id_vuelo'] ?>" 
                  class="btn btn-outline-primary btn-sm w-100 mt-auto fw-bold" 
                  style="border-color: #0A2342; color: #0A2342;">
                 Consultar Vuelo

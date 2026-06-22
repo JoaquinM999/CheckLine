@@ -15,8 +15,40 @@ iniciarSesionSiNoExiste();
 $logueado = usuarioLogueado();
 
 // Extracción de vuelos operativos con cruce de promociones aprobadas
+// --- Extracción y Filtrado Dinámico de Vuelos ---
 try {
     $pdo = getConexion();
+    
+    // Captura de filtros ingresados por el pasajero
+    $origen   = trim($_GET['origen'] ?? '');
+    $destino  = trim($_GET['destino'] ?? '');
+    $fecha    = trim($_GET['fecha'] ?? '');
+    $id_vuelo = trim($_GET['id_vuelo'] ?? ''); // Captura si viene desde un botón de promoción
+
+    // Reglas base (seguridad operativa)
+    $condiciones = ["v.estado = 'activo'", "v.fecha_salida >= CURDATE()"];
+    $parametros  = [];
+
+    // Inyección condicional de filtros
+    if ($origen !== '') {
+        $condiciones[] = "v.origen LIKE :origen";
+        $parametros['origen'] = '%' . $origen . '%';
+    }
+    if ($destino !== '') {
+        $condiciones[] = "v.destino LIKE :destino";
+        $parametros['destino'] = '%' . $destino . '%';
+    }
+    if ($fecha !== '') {
+        $condiciones[] = "v.fecha_salida = :fecha";
+        $parametros['fecha'] = $fecha;
+    }
+    if ($id_vuelo !== '') {
+        $condiciones[] = "v.id_vuelo = :id_vuelo";
+        $parametros['id_vuelo'] = $id_vuelo;
+    }
+
+    // Armado final de la consulta
+    $sqlWhere = implode(' AND ', $condiciones);
     $sql = "
         SELECT 
             v.id_vuelo, v.codigo_vuelo, v.origen, v.destino, 
@@ -27,11 +59,14 @@ try {
         FROM vuelos v
         INNER JOIN aerolineas a ON v.id_aerolinea = a.id_aerolinea
         LEFT JOIN promociones p ON v.id_vuelo = p.id_vuelo AND p.estado = 'Aprobada'
-        WHERE v.estado = 'activo' AND v.fecha_salida >= CURDATE()
+        WHERE $sqlWhere
         ORDER BY v.fecha_salida ASC, v.hora_salida ASC
     ";
-    $stmt = $pdo->query($sql);
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($parametros);
     $vuelos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     error_log("Error cargando catálogo de vuelos: " . $e->getMessage());
     die("Falla de Integridad: No es posible conectar con el itinerario de vuelos.");
