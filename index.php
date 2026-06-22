@@ -81,10 +81,11 @@ try {
 
         <div class="d-flex gap-2 align-items-center" role="group" aria-label="Controles de acceso y usuario">
           <?php if ($logueado): ?>
-            <span class="text-white-50 small align-self-center me-2" aria-live="polite">
+            <a href="perfil.php" class="btn btn-outline-light btn-sm"
+               aria-label="Ver y editar mi perfil">
               <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
               <?= htmlspecialchars($_SESSION['nombre']) ?>
-            </span>
+            </a>
             <a href="logout.php" class="btn btn-outline-light btn-sm" aria-label="Cerrar sesión actual">Salir</a>
           <?php else: ?>
             <a href="login.php" class="btn btn-outline-light btn-sm" aria-label="Ingresar al sistema">Iniciar sesión</a>
