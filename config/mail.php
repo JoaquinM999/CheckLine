@@ -12,13 +12,14 @@ require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php';
 require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php';
 
 // ─── Credenciales SMTP Outlook/Hotmail ────────────────────────────────────
-define('MAIL_HOST',      'smtp-mail.outlook.com');      // servidor Outlook
-define('MAIL_PORT',      587);                          // TLS — no cambiar
-define('MAIL_SEGURIDAD', 'tls');                        // no cambiar
-define('MAIL_USUARIO',   'checklineAR@outlook.com');      // ← tu email Outlook
-define('MAIL_PASS',      'dluzwmdticdgftwo');              // ← contraseña normal Outlook
-define('MAIL_REMITENTE', 'checklineAR@outlook.com');      // ← igual que MAIL_USUARIO
+define('MAIL_HOST',      'smtp.gmail.com');
+define('MAIL_PORT',      587);
+define('MAIL_SEGURIDAD', 'tls');
+define('MAIL_USUARIO',   'checklineae@gmail.com');
+define('MAIL_PASS',      'pzed xomh znmm ynyr');  // App Password de 16 caracteres
+define('MAIL_REMITENTE', 'checklinear@gmail.com');
 define('MAIL_NOMBRE',    'Check-Line — Sistema de Reservas');
+define('APP_URL',        'https://checkline.infinityfreeapp.com');
 
 // ─── URL base del sitio ────────────────────────────────────────────────────
 // Producción:  'https://checkline.infinityfreeapp.com'
