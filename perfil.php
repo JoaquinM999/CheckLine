@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
         $usuario['apellido'] = $apellido;
         $usuario['telefono'] = $telefono;
 
-        setMensaje('Tus datos fueron actualizados correctamente.', 'success');
+        setMensaje('success', 'Tus datos fueron actualizados correctamente.');
         header('Location: perfil.php');
         exit;
     }
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 UPDATE usuarios SET password_hash = :hash WHERE id_usuario = :id
             ")->execute(['hash' => $nuevoHash, 'id' => $id]);
 
-            setMensaje('Tu contraseña fue actualizada correctamente.', 'success');
+            setMensaje('success', 'Tu contraseña fue actualizada correctamente.');
             header('Location: perfil.php');
             exit;
         }

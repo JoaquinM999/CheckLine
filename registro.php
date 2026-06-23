@@ -25,7 +25,6 @@ if (usuarioLogueado()) {
 
 $error        = '';
 $success      = '';
-$mailEnviado  = false;  // para diferenciar el mensaje de éxito
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre   = trim($_POST['nombre']           ?? '');
@@ -94,12 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                  . "</strong> con el enlace de activación. "
                                  . "Revisá también la carpeta de spam.";
                     } else {
-                        // El usuario quedó registrado en BD pero el mail falló.
-                        // Le informamos y le damos el link directamente para no bloquearlo.
-                        // (En producción real se reintentaría con una cola de emails)
-                        $success = "Registro exitoso, pero no pudimos enviarte el email de confirmación. "
-                                 . "Podés activar tu cuenta desde este enlace: "
-                                 . "<a href='" . htmlspecialchars($linkActivacion) . "' class='alert-link'>Activar mi cuenta</a>.";
+                        // Mail falló — no revelar link ni token
+                        $error = 'Tu cuenta fue creada pero no pudimos enviarte el email de activación. '
+                               . 'Por favor contactá al administrador en checklineAR@outlook.com.';
                     }
                 } else {
                     $error = 'Ocurrió un error interno al registrar la cuenta.';

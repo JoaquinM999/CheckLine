@@ -29,7 +29,7 @@ try {
 
     // 2. Traer la última Promoción con estado 'Aprobada' vigente hoy
     $stmtP = $pdo->query("
-        SELECT p.descuento_porcentaje, a.nombre_aerolinea, v.origen, v.destino 
+        SELECT p.descuento_porcentaje, a.nombre AS nombre_aerolinea, v.origen, v.destino 
         FROM promociones p
         INNER JOIN vuelos v ON p.id_vuelo = v.id_vuelo
         INNER JOIN aerolineas a ON v.id_aerolinea = a.id_aerolinea
