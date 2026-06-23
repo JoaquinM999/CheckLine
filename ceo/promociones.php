@@ -1,166 +1,312 @@
 <?php
 /**
  * ============================================================================
- * SISTEMA CHECK-LINE - GESTIÓN DE PROMOCIONES (CEO)
+ * CHECK-LINE — ABMC PROMOCIONES (CEO)
+ * ============================================================================
+ * Cada CEO gestiona solo las promociones de vuelos de SU aerolínea.
+ * Solo se pueden editar/eliminar las que están en estado 'Pendiente'.
  * ============================================================================
  */
-// 1. FORZAMOS LA VISIBILIDAD DE ERRORES (Rompe la pantalla en blanco)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../includes/auth.php';
-
-// Control de acceso jerárquico
 requerirRol('ceo');
 
-$mensaje = obtenerYLimpiarMensaje();
+$pdo = getConexion();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_vuelo  = $_POST['id_vuelo'] ?? null;
-    $descuento = $_POST['descuento'] ?? null;
-    $detalle   = trim($_POST['detalle'] ?? '');
+// Aerolínea del CEO logueado
+$stmtAerolinea = $pdo->prepare("SELECT id_aerolinea, nombre, codigo FROM aerolineas WHERE id_ceo = :id_ceo");
+$stmtAerolinea->execute(['id_ceo' => $_SESSION['id_usuario']]);
+$aerolineaCeo = $stmtAerolinea->fetch();
 
-    if (!$id_vuelo || !$descuento) {
-        setMensaje('danger', 'El ID de vuelo y el descuento son obligatorios.');
-    } else {
-        try {
-            $pdo = getConexion();
-            
-            // 2. AJUSTE ESTRUCTURAL: Mapeo exacto según el diagrama de tu BD
-            // Asignamos fechas automáticas para cumplir con la restricción de la tabla
-            $sql = "INSERT INTO promociones (
-                        id_vuelo, 
-                        descuento_porcentaje, 
-                        fecha_inicio, 
-                        fecha_fin, 
-                        estado, 
-                        destacada, 
-                        id_creador, 
-                        fecha_creacion
-                    ) VALUES (
-                        :vuelo, 
-                        :descuento, 
-                        CURDATE(), 
-                        DATE_ADD(CURDATE(), INTERVAL 15 DAY), 
-                        'Pendiente', 
-                        0, 
-                        :creador, 
-                        NOW()
-                    )";
-                    
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                'vuelo'     => $id_vuelo,
-                'descuento' => $descuento,
-                'creador'   => $_SESSION['id_usuario']
-            ]);
-            
-            setMensaje('success', 'Promoción enviada a auditoría. Aguarde la aprobación del Administrador.');
-        } catch (PDOException $e) {
-            error_log('Error CEO Promociones: ' . $e->getMessage());
-            setMensaje('danger', 'Falla de Integridad: ' . $e->getMessage());
-        }
-    }
-    header('Location: promociones.php');
+$tituloPagina  = 'Check-Line — Gestión de Promociones';
+$seccionActiva = 'promociones';
+
+if (!$aerolineaCeo) {
+    require __DIR__ . '/../includes/header_ceo.php';
+    echo '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>Todavía no tenés una aerolínea asignada. Contactá al Administrador.</div>';
+    require __DIR__ . '/../includes/footer.php';
     exit;
 }
 
-// Extracción del historial
-try {
-    $pdo = getConexion();
-    $stmt = $pdo->query("SELECT * FROM promociones ORDER BY id_promocion DESC");
-    $promociones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    $promociones = [];
-}
+$idAerolinea = (int) $aerolineaCeo['id_aerolinea'];
+
+// Vuelos activos de esta aerolínea (para los <select>)
+$stmtVuelos = $pdo->prepare("
+    SELECT id_vuelo, codigo_vuelo, origen, destino, fecha_salida
+    FROM vuelos WHERE id_aerolinea = :id AND estado = 'activo'
+    ORDER BY fecha_salida ASC
+");
+$stmtVuelos->execute(['id' => $idAerolinea]);
+$vuelosDisponibles = $stmtVuelos->fetchAll();
+
+// Paginación
+$porPagina    = 8;
+$paginaActual = max(1, (int) ($_GET['page'] ?? 1));
+$offset       = ($paginaActual - 1) * $porPagina;
+
+$stmtCount = $pdo->prepare("
+    SELECT COUNT(*) FROM promociones p
+    INNER JOIN vuelos v ON v.id_vuelo = p.id_vuelo
+    WHERE v.id_aerolinea = :id
+");
+$stmtCount->execute(['id' => $idAerolinea]);
+$totalRegistros = (int) $stmtCount->fetchColumn();
+$totalPaginas   = max(1, (int) ceil($totalRegistros / $porPagina));
+
+// Listado filtrado por aerolínea del CEO
+$stmtPromos = $pdo->prepare("
+    SELECT p.id_promocion, p.id_vuelo, p.descuento_porcentaje,
+           p.fecha_inicio, p.fecha_fin, p.estado, p.fecha_creacion,
+           v.codigo_vuelo, v.origen, v.destino
+    FROM promociones p
+    INNER JOIN vuelos v ON v.id_vuelo = p.id_vuelo
+    WHERE v.id_aerolinea = :id
+    ORDER BY p.fecha_creacion DESC
+    LIMIT :limite OFFSET :offset
+");
+$stmtPromos->bindValue(':id',     $idAerolinea, PDO::PARAM_INT);
+$stmtPromos->bindValue(':limite', $porPagina,   PDO::PARAM_INT);
+$stmtPromos->bindValue(':offset', $offset,      PDO::PARAM_INT);
+$stmtPromos->execute();
+$promociones = $stmtPromos->fetchAll();
+
+require __DIR__ . '/../includes/header_ceo.php';
 ?>
-<!DOCTYPE html>
-<html lang="es" dir="ltr">
-<head>
-  <meta charset="UTF-8">
-  <title>Check-Line — Panel CEO</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css">
-</head>
-<body class="bg-light">
 
-<main class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h4 fw-bold" style="color:#0A2342;">Gestión de Promociones</h1>
-    <a href="../index.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Volver al Inicio</a>
-  </div>
+<nav aria-label="breadcrumb"><ol class="breadcrumb small mb-2">
+  <li class="breadcrumb-item"><a href="vuelos.php">Inicio</a></li>
+  <li class="breadcrumb-item active">Gestión de Promociones</li>
+</ol></nav>
 
-  <?php if ($mensaje): ?>
-    <div class="alert alert-<?= $mensaje['tipo'] ?> shadow-sm">
-      <i class="bi bi-info-circle me-2"></i><?= htmlspecialchars($mensaje['texto']) ?>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h6 class="fw-semibold mb-0">
+    <i class="bi bi-percent me-2 text-primary"></i>Gestión de Promociones
+    <span class="text-muted fw-normal small">— <?= htmlspecialchars($aerolineaCeo['nombre']) ?></span>
+  </h6>
+  <?php if (!empty($vuelosDisponibles)): ?>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCrear">
+      <i class="bi bi-plus-circle me-1"></i>Nueva Promoción
+    </button>
   <?php endif; ?>
+</div>
 
-  <div class="row g-4">
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 pt-4 pb-0">
-          <h2 class="h6 fw-bold text-muted">Nueva Propuesta</h2>
-        </div>
-        <div class="card-body">
-          <form method="POST" action="promociones.php">
-            <div class="mb-3">
-              <label class="form-label small fw-semibold text-muted">ID de Vuelo Registrado</label>
-              <input type="number" name="id_vuelo" class="form-control form-control-sm" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label small fw-semibold text-muted">Descuento (%)</label>
-              <input type="number" name="descuento" class="form-control form-control-sm" min="1" max="100" required>
-            </div>
-            <div class="mb-4">
-              <label class="form-label small fw-semibold text-muted">Detalle Comercial (Opcional)</label>
-              <input type="text" name="detalle" class="form-control form-control-sm">
-            </div>
-            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold" style="background-color: #0A2342; border-color: #0A2342;">
-              Solicitar Aprobación
+<?php if (empty($vuelosDisponibles)): ?>
+  <div class="alert alert-warning small">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    No tenés vuelos activos disponibles. Creá al menos un vuelo antes de cargar promociones.
+  </div>
+<?php endif; ?>
+
+<?php if (empty($promociones)): ?>
+  <div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    No hay promociones cargadas todavía.
+    <?= !empty($vuelosDisponibles) ? 'Hacé clic en "Nueva Promoción" para crear la primera.' : '' ?>
+  </div>
+<?php else: ?>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover table-bordered align-middle" style="font-size:12.5px;">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Vuelo</th>
+        <th>Descuento</th>
+        <th>Vigencia</th>
+        <th>Estado</th>
+        <th style="width:100px;">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($promociones as $p):
+        $badgeEstado = match($p['estado']) {
+            'Aprobada' => 'bg-success',
+            'Denegada' => 'bg-danger',
+            default    => 'bg-warning text-dark',
+        };
+        $editable = ($p['estado'] === 'Pendiente');
+      ?>
+      <tr>
+        <td class="text-muted"><?= (int) $p['id_promocion'] ?></td>
+        <td>
+          <span class="badge bg-secondary me-1"><?= htmlspecialchars($p['codigo_vuelo']) ?></span>
+          <small class="text-muted"><?= htmlspecialchars($p['origen']) ?> → <?= htmlspecialchars($p['destino']) ?></small>
+        </td>
+        <td><span class="badge bg-primary fs-6">-<?= htmlspecialchars($p['descuento_porcentaje']) ?>%</span></td>
+        <td class="small text-muted">
+          <?= date('d/m/Y', strtotime($p['fecha_inicio'])) ?> → <?= date('d/m/Y', strtotime($p['fecha_fin'])) ?>
+        </td>
+        <td><span class="badge <?= $badgeEstado ?>"><?= htmlspecialchars($p['estado']) ?></span></td>
+        <td>
+          <?php if ($editable): ?>
+            <button class="btn btn-sm btn-outline-primary py-0 me-1" title="Editar"
+                    data-bs-toggle="modal" data-bs-target="#modalEditar<?= (int) $p['id_promocion'] ?>">
+              <i class="bi bi-pencil"></i>
             </button>
+            <button class="btn btn-sm btn-outline-danger py-0" title="Eliminar"
+                    onclick="confirmarEliminar(<?= (int) $p['id_promocion'] ?>, '<?= htmlspecialchars(addslashes($p['codigo_vuelo'])) ?>')">
+              <i class="bi bi-trash"></i>
+            </button>
+          <?php else: ?>
+            <span class="text-muted" title="No editable: ya fue auditada"><i class="bi bi-lock"></i></span>
+          <?php endif; ?>
+        </td>
+      </tr>
+
+      <?php if ($editable): ?>
+      <!-- Modal Editar -->
+      <div class="modal fade" id="modalEditar<?= (int) $p['id_promocion'] ?>" tabindex="-1">
+        <div class="modal-dialog">
+          <form method="POST" action="promocion_action.php" class="modal-content">
+            <input type="hidden" name="accion"       value="editar">
+            <input type="hidden" name="id_promocion" value="<?= (int) $p['id_promocion'] ?>">
+            <div class="modal-header" style="background-color:#0A2342;">
+              <h6 class="modal-title text-white"><i class="bi bi-pencil-square me-2"></i>Editar Promoción</h6>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Vuelo <span class="text-danger">*</span></label>
+                <select name="id_vuelo" class="form-select form-select-sm" required>
+                  <?php foreach ($vuelosDisponibles as $vd): ?>
+                    <option value="<?= (int) $vd['id_vuelo'] ?>"
+                      <?= ((int) $vd['id_vuelo'] === (int) $p['id_vuelo']) ? 'selected' : '' ?>>
+                      <?= htmlspecialchars($vd['codigo_vuelo'] . ' — ' . $vd['origen'] . ' → ' . $vd['destino']) ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Descuento (%) <span class="text-danger">*</span></label>
+                <input type="number" name="descuento_porcentaje" class="form-control form-control-sm"
+                       required min="1" max="100" step="0.01"
+                       value="<?= htmlspecialchars($p['descuento_porcentaje']) ?>">
+              </div>
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold">Fecha inicio <span class="text-danger">*</span></label>
+                  <input type="date" name="fecha_inicio" class="form-control form-control-sm"
+                         required value="<?= htmlspecialchars($p['fecha_inicio']) ?>">
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label small fw-semibold">Fecha fin <span class="text-danger">*</span></label>
+                  <input type="date" name="fecha_fin" class="form-control form-control-sm"
+                         required value="<?= htmlspecialchars($p['fecha_fin']) ?>">
+                </div>
+              </div>
+              <div class="form-text mt-2">
+                <i class="bi bi-info-circle me-1"></i>
+                Al guardar, la promoción volverá a estado <strong>Pendiente</strong> para re-auditoría.
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-floppy me-1"></i>Guardar</button>
+            </div>
           </form>
         </div>
       </div>
-    </div>
+      <?php endif; ?>
 
-    <div class="col-md-8">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body p-0">
-          <table class="table table-hover mb-0 align-middle">
-            <thead class="table-light text-muted small">
-              <tr>
-                <th class="px-4">Vuelo</th>
-                <th>Descuento</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($promociones as $p): ?>
-              <tr>
-                <td class="px-4 fw-semibold">#<?= htmlspecialchars($p['id_vuelo']) ?></td>
-                <td><span class="badge bg-secondary"><?= htmlspecialchars($p['descuento_porcentaje'] ?? '0') ?>%</span></td>
-                <td>
-                  <?php if ($p['estado'] === 'Aprobada'): ?>
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success">Aprobada</span>
-                  <?php elseif ($p['estado'] === 'Denegada'): ?>
-                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Denegada</span>
-                  <?php else: ?>
-                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">Pendiente</span>
-                  <?php endif; ?>
-                </td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
+
+<?php if ($totalPaginas > 1): ?>
+<nav><ul class="pagination pagination-sm">
+  <li class="page-item <?= $paginaActual <= 1 ? 'disabled' : '' ?>">
+    <a class="page-link" href="?page=<?= max(1, $paginaActual - 1) ?>">‹ Anterior</a>
+  </li>
+  <?php for ($p2 = 1; $p2 <= $totalPaginas; $p2++): ?>
+    <li class="page-item <?= $p2 === $paginaActual ? 'active' : '' ?>">
+      <a class="page-link" href="?page=<?= $p2 ?>"><?= $p2 ?></a>
+    </li>
+  <?php endfor; ?>
+  <li class="page-item <?= $paginaActual >= $totalPaginas ? 'disabled' : '' ?>">
+    <a class="page-link" href="?page=<?= min($totalPaginas, $paginaActual + 1) ?>">Siguiente ›</a>
+  </li>
+</ul></nav>
+<?php endif; ?>
+<?php endif; ?>
+
+<!-- Modal Alta -->
+<div class="modal fade" id="modalCrear" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="promocion_action.php" class="modal-content">
+      <input type="hidden" name="accion" value="crear">
+      <div class="modal-header" style="background-color:#0A2342;">
+        <h6 class="modal-title text-white"><i class="bi bi-percent me-2"></i>Nueva Promoción</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info small py-2 mb-3">
+          <i class="bi bi-clock-history me-1"></i>
+          La promoción quedará en estado <strong>Pendiente</strong> hasta que el Administrador la apruebe.
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Vuelo <span class="text-danger">*</span></label>
+          <select name="id_vuelo" class="form-select form-select-sm" required>
+            <option value="" disabled selected>Seleccionar vuelo...</option>
+            <?php foreach ($vuelosDisponibles as $vd): ?>
+              <option value="<?= (int) $vd['id_vuelo'] ?>">
+                <?= htmlspecialchars($vd['codigo_vuelo'] . ' — ' . $vd['origen'] . ' → ' . $vd['destino'] . ' (' . date('d/m/Y', strtotime($vd['fecha_salida'])) . ')') ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Descuento (%) <span class="text-danger">*</span></label>
+          <input type="number" name="descuento_porcentaje" class="form-control form-control-sm"
+                 required min="1" max="100" step="0.01" placeholder="Ej: 15">
+        </div>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label small fw-semibold">Fecha inicio <span class="text-danger">*</span></label>
+            <input type="date" name="fecha_inicio" class="form-control form-control-sm" required>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label small fw-semibold">Fecha fin <span class="text-danger">*</span></label>
+            <input type="date" name="fecha_fin" class="form-control form-control-sm" required>
+          </div>
         </div>
       </div>
-    </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send me-1"></i>Enviar a auditoría</button>
+      </div>
+    </form>
   </div>
-</main>
+</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" defer></script>
-</body>
-</html>
+<!-- Modal Baja -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="promocion_action.php" class="modal-content">
+      <input type="hidden" name="accion"       value="eliminar">
+      <input type="hidden" name="id_promocion" id="eliminarId" value="">
+      <div class="modal-header bg-danger text-white">
+        <h6 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Confirmar eliminación</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2">¿Seguro que querés eliminar la promoción del vuelo <strong id="eliminarCodigo"></strong>?</p>
+        <p class="text-danger small mb-0"><i class="bi bi-info-circle me-1"></i>Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash me-1"></i>Eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function confirmarEliminar(id, codigo) {
+  document.getElementById('eliminarId').value = id;
+  document.getElementById('eliminarCodigo').textContent = codigo;
+  new bootstrap.Modal(document.getElementById('modalEliminar')).show();
+}
+</script>
+
+<?php require __DIR__ . '/../includes/footer.php'; ?>

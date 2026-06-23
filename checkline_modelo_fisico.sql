@@ -72,7 +72,7 @@ CREATE TABLE promociones (
   descuento_porcentaje  DECIMAL(5,2) NOT NULL,
   fecha_inicio          DATE NOT NULL,
   fecha_fin             DATE NOT NULL,
-  estado                ENUM('pendiente','aprobada','denegada') NOT NULL DEFAULT 'pendiente',
+  estado                ENUM('Pendiente','Aprobada','Denegada') NOT NULL DEFAULT 'Pendiente',
   destacada             TINYINT(1) NOT NULL DEFAULT 0,  -- monetización: Punto 10
   id_creador            INT NOT NULL,   -- CEO
   id_aprobador          INT NULL,       -- Admin
@@ -92,7 +92,7 @@ CREATE TABLE reservas (
   id_vuelo          INT NOT NULL,
   id_promocion      INT NULL,
   precio_final      DECIMAL(10,2) NOT NULL,
-  estado            ENUM('pendiente_pago','confirmada','cancelada') NOT NULL DEFAULT 'pendiente_pago',
+  estado            ENUM('pendiente_pago','Confirmada','cancelada') NOT NULL DEFAULT 'pendiente_pago',
   fecha_reserva     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   fecha_pago        DATETIME NULL,
   fecha_cancelacion DATETIME NULL,
